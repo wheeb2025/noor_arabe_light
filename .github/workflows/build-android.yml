@@ -1,31 +1,34 @@
 name: Build Android APK (Flutter)
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:        # لتشغيله يدويًا من تبويب Actions
   push:
     tags:
-      - 'v*'
+      - 'v*'                # يبني تلقائيًا عند إنشاء Tag مثل v0.1 أو v0.2
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
 
-      - name: Show Flutter version
+      - name: Flutter version
         run: flutter --version
 
-      # ✅ أنشئ هيكل المشروع كاملاً (android/، gradle، إلخ) إن لم يكن موجوداً
+      # ✅ ينشئ ملفات android/ تلقائيًا إن لم تكن موجودة
       - name: Ensure Flutter android project exists
         run: |
           flutter create . \
@@ -37,14 +40,15 @@ jobs:
       - name: Pub get
         run: flutter pub get
 
-      # يمكنك الاكتفاء بالـ Debug للتجربة
+      # Debug للتجربة الفورية
       - name: Build DEBUG APK
         run: flutter build apk --debug
 
-      # (اختياري) بناء Release
+      # (اختياري) نسخة Release
       - name: Build RELEASE APK
         run: flutter build apk --release
 
+      # حفظ ملفات الـAPK كـ Artifact
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -53,6 +57,7 @@ jobs:
             build/app/outputs/flutter-apk/app-debug.apk
             build/app/outputs/flutter-apk/app-release.apk
 
+      # عند البناء بواسطة Tag يرفع الـAPK تلقائيًا إلى الـRelease
       - name: Create GitHub Release and upload APKs
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
