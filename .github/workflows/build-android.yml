@@ -5,6 +5,8 @@ on:
   push:
     tags:
       - 'v*'                # يبني تلقائيًا عند إنشاء Tag مثل v0.1 أو v0.2
+permissions:                  # 
+  contents: write             # (مطلوب علشان نرفع على GitHub Release)
 
 jobs:
   build:
@@ -40,9 +42,7 @@ jobs:
       - name: Pub get
         run: flutter pub get
 
-      # Debug للتجربة الفورية
-      - name: Build DEBUG APK
-        run: flutter build apk --debug
+      
 
       # (اختياري) نسخة Release
       - name: Build RELEASE APK
@@ -62,6 +62,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+        files: build/app/outputs/flutter-apk/app-release.apk  
           files: |
             build/app/outputs/flutter-apk/app-debug.apk
             build/app/outputs/flutter-apk/app-release.apk
